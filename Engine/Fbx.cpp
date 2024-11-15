@@ -24,11 +24,18 @@ HRESULT Fbx::Load(std::string fileName)
 	FbxScene* pFbxScene = FbxScene::Create(pFbxManager, "fbxscene");
 	fbxImporter->Import(pFbxScene);
 	fbxImporter->Destroy();
+	//FbxGeometryConverter geometryConverter(pFbxManager);
+	//geometryConverter.Triangulate(pFbxScene, true, true);
+	//ダメポリゴンを削除
+	//geometryConverter.RemoveBadPolygonsFromMeshes(pFbxScene);
+	//geometryConverter.SplitMeshesPerMaterial(pFbxScene, true);
+
 
 	//メッシュ情報を取得
 	FbxNode* rootNode = pFbxScene->GetRootNode();
 	FbxNode* pNode = rootNode->GetChild(0);
 	FbxMesh* mesh = pNode->GetMesh();
+	mesh->SplitPoints(FbxLayerElement::eTextureDiffuse);
 
 	//各情報の個数を取得
 	vertexCount_ = mesh->GetControlPointsCount();	//頂点の数
@@ -80,7 +87,17 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 			vertices[index].position = XMVectorSet((float)pos[0], (float)pos[1], (float)pos[2], 0.0f);
 
 			//頂点のUV
+			//int lc = mesh->GetLayerCount();
 			FbxLayerElementUV* pUV = mesh->GetLayer(0)->GetUVs();
+			int UVCount = pUV->GetDirectArray().GetCount();
+			int IndexCount = pUV->GetIndexArray().GetCount();
+			int size = UVCount > IndexCount ? UVCount : IndexCount;
+			XMFLOAT2* buffer = new XMFLOAT2[size];
+
+			FbxLayerElement::EMappingMode mPm = pUV->GetMappingMode();
+			FbxLayerElement::EReferenceMode rfm = pUV->GetReferenceMode();
+
+
 			int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
 			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
 			vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0 - uv.mData[1]), 0.0f, 0.0f);
