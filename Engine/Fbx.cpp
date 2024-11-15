@@ -97,6 +97,24 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 			FbxLayerElement::EMappingMode mPm = pUV->GetMappingMode();
 			FbxLayerElement::EReferenceMode rfm = pUV->GetReferenceMode();
 
+			if (mPm == FbxLayerElement::eByPolygonVertex)
+			{
+				// 直接取得
+				for (int i = 0; i < size; ++i) {
+					buffer[i].x = (float)pUV->GetDirectArray().GetAt(i)[0];
+					buffer[i].y = (float)pUV->GetDirectArray().GetAt(i)[1];
+				}
+			}
+			else
+				if (rfm == FbxLayerElement::eINDEX_TO_DIRECT) {
+					// インデックスから取得
+					for (int i = 0; i < size; ++i) {
+						int index = elem->GetIndexArray().GetAt(i);
+						buffer[i].x = (float)elem->GetDirectArray().GetAt(index)[0];
+						buffer[i].y = (float)elem->GetDirectArray().GetAt(index)[1];
+					}
+			}
+
 
 			int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
 			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
