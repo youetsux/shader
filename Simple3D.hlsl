@@ -13,7 +13,7 @@ cbuffer global
 	float4x4	matWVP;			// ワールド・ビュー・プロジェクションの合成行列
 	float4x4	matNormal;           // ワールド行列
 	float4		diffuseColor;		//マテリアルの色＝拡散反射係数tt
-    float2		factor;
+    float2		factor;				//名前があれだけどdiffuseFactorです
 	bool		isTextured;			//テクスチャーが貼られているかどうか
 };
 
@@ -60,13 +60,13 @@ float4 PS(VS_OUT inData) : SV_Target
 	float4 ambient;
 	if (isTextured == false)
 	{
-		diffuse = lightSource * diffuseColor * inData.color * factor.x;
-        ambient = lightSource * diffuseColor * ambentSource * factor.x;
+		diffuse = diffuseColor * inData.color * factor.x;
+        ambient = diffuseColor * ambentSource * factor.x;
     }
 	else
 	{
-        diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * inData.color * factor.x;
-        ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * ambentSource * factor.x;
+        diffuse = g_texture.Sample(g_sampler, inData.uv) * inData.color * factor.x;
+        ambient = g_texture.Sample(g_sampler, inData.uv) * ambentSource * factor.x;
 
     }
 	//return g_texture.Sample(g_sampler, inData.uv);// (diffuse + ambient);]

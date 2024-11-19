@@ -72,7 +72,7 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 {
 	//頂点情報を入れる配列
 	VERTEX* vertices = new VERTEX[vertexCount_];
-
+	//std::pair<int,FbxVector4>  ply[3];//三個分
 	//全ポリゴン
 	for (DWORD poly = 0; poly < polygonCount_; poly++)
 	{
@@ -86,45 +86,49 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 			FbxVector4 pos = mesh->GetControlPointAt(index);
 			vertices[index].position = XMVectorSet((float)pos[0], (float)pos[1], (float)pos[2], 0.0f);
 
-			//頂点のUV
-			//int lc = mesh->GetLayerCount();
-			FbxLayerElementUV* pUV = mesh->GetLayer(0)->GetUVs();
-			int UVCount = pUV->GetDirectArray().GetCount();
-			int IndexCount = pUV->GetIndexArray().GetCount();
-			int size = UVCount > IndexCount ? UVCount : IndexCount;
-			XMFLOAT2* buffer = new XMFLOAT2[size];
-
-			FbxLayerElement::EMappingMode mPm = pUV->GetMappingMode();
-			FbxLayerElement::EReferenceMode rfm = pUV->GetReferenceMode();
-
-			if (mPm == FbxLayerElement::eByPolygonVertex)
-			{
-				// 直接取得
-				for (int i = 0; i < size; ++i) {
-					buffer[i].x = (float)pUV->GetDirectArray().GetAt(i)[0];
-					buffer[i].y = (float)pUV->GetDirectArray().GetAt(i)[1];
-				}
-			}
-			else
-				if (rfm == FbxLayerElement::eINDEX_TO_DIRECT) {
-					// インデックスから取得
-					for (int i = 0; i < size; ++i) {
-						int index = elem->GetIndexArray().GetAt(i);
-						buffer[i].x = (float)elem->GetDirectArray().GetAt(index)[0];
-						buffer[i].y = (float)elem->GetDirectArray().GetAt(index)[1];
-					}
-			}
-
-
-			int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
-			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
-			vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0 - uv.mData[1]), 0.0f, 0.0f);
+			//int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
+			//FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
+			//vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0 - uv.mData[1]), 0.0f, 0.0f);
 
 			//頂点の法線
 			FbxVector4 Normal;
 			mesh->GetPolygonVertexNormal(poly, vertex, Normal);	//ｉ番目のポリゴンの、ｊ番目の頂点の法線をゲット
 			vertices[index].normal = XMVectorSet((float)Normal[0], (float)Normal[1], (float)Normal[2], 0.0f);
 		}
+
+
+
+		//頂点のUV
+		//int lc = mesh->GetLayerCount();
+		FbxLayerElementUV* pUV = mesh->GetLayer(0)->GetUVs();
+		int UVCount = pUV->GetDirectArray().GetCount();
+		int IndexCount = pUV->GetIndexArray().GetCount();
+		int size = UVCount > IndexCount ? UVCount : IndexCount;
+		XMFLOAT2* buffer = new XMFLOAT2[size];
+
+		FbxLayerElement::EMappingMode mPm = pUV->GetMappingMode();
+		FbxLayerElement::EReferenceMode rfm = pUV->GetReferenceMode();
+
+		if (mPm == FbxLayerElement::eByPolygonVertex)
+		{
+			// 直接取得
+			for (int i = 0; i < size; ++i) {
+				buffer[i].x = (float)pUV->GetDirectArray().GetAt(i)[0];
+				buffer[i].y = (float)pUV->GetDirectArray().GetAt(i)[1];
+			}
+		}
+		else if (mPm == FbxLayerElement::eByControlPoint) {
+			if (rfm == FbxLayerElement::eDirect) {
+				// インデックスから取得
+				for (int i = 0; i < size; ++i) {
+					//int index = pUV->GetIndexArray().GetAt(i);
+
+					vertices[i].uv = XMVectorSet((float)pUV->GetDirectArray().GetAt(i)[0],
+						1.0 - (float)pUV->GetDirectArray().GetAt(i)[1], 0.0f, 0.0f);
+				}
+			}
+		}
+
 	}
 
 	//頂点バッファ

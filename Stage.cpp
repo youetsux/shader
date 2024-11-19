@@ -20,7 +20,7 @@ void Stage::Initialize()
 {
     hModel_[0] = Model::Load("Assets\\Ball.fbx");
     hModel_[1] = Model::Load("Assets\\tama1.fbx");
-    hModel_[2] = Model::Load("Assets\\tama2.fbx");
+    hModel_[2] = Model::Load("Assets\\tama3.fbx");
 }
 
 //çXêV
