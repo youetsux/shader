@@ -49,7 +49,7 @@ class Fbx
 	ID3D11Buffer* pVertexBuffer_;
 	ID3D11Buffer** pIndexBuffer_;
 	ID3D11Buffer* pConstantBuffer_;
-	MATERIAL* pMaterialList_;
+	std::vector<MATERIAL> pMaterialList_;
 	vector <int> indexCount_;
 	
 	void InitVertex(fbxsdk::FbxMesh* mesh);

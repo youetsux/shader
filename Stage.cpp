@@ -8,6 +8,7 @@ Stage::Stage(GameObject* parent)
 {
     hModel_[0] = -1;
     hModel_[1] = -1;
+    hGround = -1;
     hModel_[2] = -1;
 }
 
@@ -22,6 +23,7 @@ void Stage::Initialize()
     hModel_[0] = Model::Load("Assets\\Ball.fbx");
     hModel_[1] = Model::Load("Assets\\tama1.fbx");
     hModel_[2] = Model::Load("Assets\\tama2.fbx");
+    hGround = Model::Load("Assets\\plane.fbx");
 }
 
 //çXêV
@@ -54,6 +56,12 @@ void Stage::Draw()
         Model::Draw(hModel_[i]);
     }
 
+    Transform tr;
+    tr.position_ = { 0, -2, 0 };
+    tr.scale_ = { 15.0f, 15.0f, 15.0f };
+    tr.rotate_ = { 0,0,0 };
+    Model::SetTransform(hGround, tr);
+    Model::Draw(hGround);
 }
 
 //äJï˙

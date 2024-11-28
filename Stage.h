@@ -6,6 +6,7 @@
 class Stage : public GameObject
 {
     int hModel_[3];    //モデル番号
+    int hGround;
 public:
     //コンストラクタ
     Stage(GameObject* parent);

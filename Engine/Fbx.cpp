@@ -3,11 +3,12 @@
 #include "Direct3D.h"
 #include "Camera.h"
 #include "Texture.h"
+#include <vector>
+#include <filesystem>
 
 Fbx::Fbx()
 	:vertexCount_(0), polygonCount_(0), materialCount_(0),
-	pVertexBuffer_(nullptr), pIndexBuffer_(nullptr), pConstantBuffer_(nullptr),
-	pMaterialList_(nullptr)
+	pVertexBuffer_(nullptr), pIndexBuffer_(nullptr), pConstantBuffer_(nullptr)
 {
 }
 
@@ -184,10 +185,10 @@ void Fbx::IntConstantBuffer()
 		MessageBox(NULL, "コンスタントバッファの作成に失敗しました", "エラー", MB_OK);
 	}
 }
-
+namespace fs = std::filesystem;
 void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 {
-	pMaterialList_ = new MATERIAL[materialCount_];
+	pMaterialList_ = std::vector<MATERIAL>(materialCount_);
 
 	for (int i = 0; i < materialCount_; i++)
 	{
@@ -207,15 +208,21 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			const char* textureFilePath = textureInfo->GetRelativeFileName();
 
 			//ファイル名+拡張だけにする
-			char name[_MAX_FNAME];	//ファイル名
-			char ext[_MAX_EXT];	//拡張子
-			_splitpath_s(textureFilePath, nullptr, 0, nullptr, 0, name, _MAX_FNAME, ext, _MAX_EXT);
-			wsprintf(name, "%s%s", name, ext);
+			//char name[_MAX_FNAME];	//ファイル名
+			//char ext[_MAX_EXT];	//拡張子
+			//_splitpath_s(textureFilePath, nullptr, 0, nullptr, 0, name, _MAX_FNAME, ext, _MAX_EXT);
+			//wsprintf(name, "%s%s", name, ext);
+			fs::path texFile(textureFilePath);
+			//FbxFileTexture* textureInfo = lProperty.GetSrcObject<FbxFileTexture>(0);
+			//const char* textureFilePath = textureInfo->GetRelativeFileName();
 
 			//ファイルからテクスチャ作成
-			pMaterialList_[i].pTexture = new Texture;
-			HRESULT hr = pMaterialList_[i].pTexture->Load(name);
-			assert(hr == S_OK);
+			if (fs::is_regular_file(texFile))
+			{
+				pMaterialList_[i].pTexture = new Texture;
+				HRESULT hr = pMaterialList_[i].pTexture->Load(texFile.string());
+				assert(hr == S_OK);
+			}
 			FbxSurfaceLambert* pMaterial = (FbxSurfaceLambert*)pNode->GetMaterial(i);
 			FbxDouble  diffuse = pMaterial->DiffuseFactor;
 			pMaterialList_[i].factor = XMFLOAT2((float)diffuse, (float)diffuse );
@@ -237,9 +244,10 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 	}
 }
 
+
 void Fbx::Draw(Transform& transform)
 {
-	Direct3D::SetShader(SHADER_3D);
+	Direct3D::SetShader(SHADER_POINT);
 	transform.Calclation();//トランスフォームを計算
 	
 
