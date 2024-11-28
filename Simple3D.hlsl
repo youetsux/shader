@@ -13,6 +13,7 @@ cbuffer global
 	float4x4	matWVP;			// ワールド・ビュー・プロジェクションの合成行列
 	float4x4	matNormal;           // ワールド行列
 	float4		diffuseColor;		//マテリアルの色＝拡散反射係数tt
+    float4		lightPosition;
     float2		factor;
 	bool		isTextured;			//テクスチャーが貼られているかどうか
 };
@@ -41,7 +42,8 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	outData.uv = uv;
 
 	normal = mul(normal , matNormal);
-	float4 light = float4(0, 1, -1, 0);
+	//float4 light = float4(0, 1, -1, 0);
+    float4 light = lightPosition;
 	light = normalize(light);
 	outData.color = clamp(dot(normal, light), 0, 1);
 

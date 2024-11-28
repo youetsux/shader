@@ -22,6 +22,7 @@ namespace Direct3D
 		ID3D11RasterizerState* pRasterizerState_ = nullptr;	//ラスタライザー
 	};
 	SHADER_BUNDLE shaderBundle[SHADER_MAX];
+	XMFLOAT4 lightPos{ 0, 1, -1, 0 };
 }
 
 
@@ -355,4 +356,14 @@ void Direct3D::Release()
 	SAFE_RELEASE(pSwapChain_);
 	SAFE_RELEASE(pContext_);
 	SAFE_RELEASE(pDevice_);
+}
+
+XMFLOAT4 Direct3D::GetLightPos()
+{
+	return lightPos;
+}
+
+void Direct3D::SetLightPos(XMFLOAT4 pos)
+{
+	lightPos = pos;
 }

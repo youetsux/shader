@@ -1,5 +1,6 @@
 #include "Stage.h"
 #include "Engine/Model.h"
+#include "Engine/Input.h"
 
 //コンストラクタ
 Stage::Stage(GameObject* parent)
@@ -27,6 +28,18 @@ void Stage::Initialize()
 void Stage::Update()
 {
     transform_.rotate_.y += 0.5f;
+    if (Input::IsKey(DIK_A))
+    {
+        XMFLOAT4 p = Direct3D::GetLightPos();
+        p = { p.x - 0.1f,p.y, p.z,p.w };
+        Direct3D::SetLightPos(p);
+    }
+    if (Input::IsKey(DIK_D))
+    {
+        XMFLOAT4 p = Direct3D::GetLightPos();
+        p = { p.x + 0.1f,p.y, p.z,p.w };
+        Direct3D::SetLightPos(p);
+    }
 }
 
 //描画

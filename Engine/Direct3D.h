@@ -43,4 +43,7 @@ namespace Direct3D
 
 	//‰ð•ú
 	void Release();
+
+	XMFLOAT4 GetLightPos();
+	void SetLightPos(XMFLOAT4 pos);
 };
