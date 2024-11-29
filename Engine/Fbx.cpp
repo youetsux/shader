@@ -86,9 +86,15 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
 			vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0 - uv.mData[1]), 0.0f, 0.0f);
 
+
+			FbxLayerElementNormal* leNormal = mesh->GetLayer(0)->GetNormals();
+			FbxLayerElement::EMappingMode mp = leNormal->GetMappingMode();
 			//頂点の法線
-			FbxVector4 Normal;
-			mesh->GetPolygonVertexNormal(poly, vertex, Normal);	//ｉ番目のポリゴンの、ｊ番目の頂点の法線をゲット
+			//FbxVector4 Normal;
+			//mesh->GetPolygonVertexNormal(poly, vertex, Normal);	//ｉ番目のポリゴンの、ｊ番目の頂点の法線をゲット
+
+			FbxVector4 Normal = leNormal->GetDirectArray().GetAt(index);
+			
 			vertices[index].normal = XMVectorSet((float)Normal[0], (float)Normal[1], -(float)Normal[2], 0.0f);
 		}
 	}
@@ -225,6 +231,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			}
 			FbxSurfaceLambert* pMaterial = (FbxSurfaceLambert*)pNode->GetMaterial(i);
 			FbxDouble  diffuse = pMaterial->DiffuseFactor;
+			//diffuse = 1.0;
 			pMaterialList_[i].factor = XMFLOAT2((float)diffuse, (float)diffuse );
 			
 		}

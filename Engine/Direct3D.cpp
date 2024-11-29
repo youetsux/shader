@@ -22,7 +22,7 @@ namespace Direct3D
 		ID3D11RasterizerState* pRasterizerState_ = nullptr;	//ラスタライザー
 	};
 	SHADER_BUNDLE shaderBundle[SHADER_MAX];
-	XMFLOAT4 lightPos{ 0, 2, 0, 0 };
+	XMFLOAT4 lightPos{ 0, 0.5, 0, 0 };
 }
 
 
