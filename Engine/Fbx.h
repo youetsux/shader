@@ -22,16 +22,17 @@ class Fbx
 	{
 		Texture* pTexture;
 		XMFLOAT4 diffuse;
-		XMFLOAT2 factor;
+		XMFLOAT4 factor;
 	};
 
 	struct CONSTANT_BUFFER
 	{
-		XMMATRIX	matWVP;
-		XMMATRIX	matNormal;
-		XMFLOAT4	diffuseColor;
-		XMFLOAT4    lightPosition;
-		XMFLOAT2	diffuseFactor;
+		XMMATRIX	matWVP;//スクリーン変換マトリクス
+		XMMATRIX	matW; //ワールド変換マトリクス
+		XMMATRIX	matNormal;//法線ワールド変換用マトリクス
+		XMFLOAT4	diffuseColor;//RGBの拡散反射係数（色）
+		XMFLOAT4    lightPosition;//光源位置
+		XMFLOAT4	diffuseFactor;//拡散光の反射係数
 		int			isTextured;
 	};
 

@@ -43,5 +43,6 @@ XMMATRIX Transform::GetWorldMatrix()
 
 XMMATRIX Transform::GetNormalMatrix()
 {
+    //return matRotate_ * XMMatrixInverse(nullptr, matScale_);
     return matRotate_ * XMMatrixInverse(nullptr, matScale_);
 }

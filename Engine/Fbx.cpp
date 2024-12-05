@@ -232,7 +232,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			FbxSurfaceLambert* pMaterial = (FbxSurfaceLambert*)pNode->GetMaterial(i);
 			FbxDouble  diffuse = pMaterial->DiffuseFactor;
 			//diffuse = 1.0;
-			pMaterialList_[i].factor = XMFLOAT2((float)diffuse, (float)diffuse );
+			pMaterialList_[i].factor = XMFLOAT4((float)diffuse, (float)diffuse, (float)diffuse, (float)diffuse);
 			
 		}
 
@@ -246,7 +246,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			pMaterialList_[i].diffuse = XMFLOAT4((float)diffuse[0], (float)diffuse[1], (float)diffuse[2], 1.0f);
 			//FbxSurfaceLambert* pMaterial = (FbxSurfaceLambert*)pNode->GetMaterial(i);
 			FbxDouble  factor = pMaterial->DiffuseFactor;
-			pMaterialList_[i].factor = XMFLOAT2((float)factor, (float)factor);
+			pMaterialList_[i].factor = XMFLOAT4((float)factor, (float)factor, (float)factor, (float)factor);
 		}
 	}
 }
@@ -263,6 +263,7 @@ void Fbx::Draw(Transform& transform)
 		//コンスタントバッファに情報を渡す
 		CONSTANT_BUFFER cb;
 		cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
+		cb.matW = XMMatrixTranspose(transform.GetWorldMatrix());
 		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.diffuseColor = pMaterialList_[i].diffuse;
 		cb.lightPosition = Direct3D::GetLightPos();

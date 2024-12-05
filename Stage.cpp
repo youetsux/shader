@@ -37,13 +37,37 @@ void Stage::Update()
     if (Input::IsKey(DIK_A))
     {
         XMFLOAT4 p = Direct3D::GetLightPos();
-        p = { p.x - 0.1f,p.y, p.z,p.w };
+        p = { p.x - 0.01f,p.y, p.z,p.w };
         Direct3D::SetLightPos(p);
     }
     if (Input::IsKey(DIK_D))
     {
         XMFLOAT4 p = Direct3D::GetLightPos();
-        p = { p.x + 0.1f,p.y, p.z,p.w };
+        p = { p.x + 0.01f,p.y, p.z,p.w };
+        Direct3D::SetLightPos(p);
+    }
+    if (Input::IsKey(DIK_W))
+    {
+        XMFLOAT4 p = Direct3D::GetLightPos();
+        p = { p.x,p.y, p.z + 0.01f,p.w };
+        Direct3D::SetLightPos(p);
+    }
+    if (Input::IsKey(DIK_S))
+    {
+        XMFLOAT4 p = Direct3D::GetLightPos();
+        p = { p.x ,p.y, p.z - 0.01f,p.w };
+        Direct3D::SetLightPos(p);
+    }
+    if (Input::IsKey(DIK_UP))
+    {
+        XMFLOAT4 p = Direct3D::GetLightPos();
+        p = { p.x,p.y + 0.01f, p.z,p.w };
+        Direct3D::SetLightPos(p);
+    }
+    if (Input::IsKey(DIK_DOWN))
+    {
+        XMFLOAT4 p = Direct3D::GetLightPos();
+        p = { p.x ,p.y - 0.01f, p.z,p.w };
         Direct3D::SetLightPos(p);
     }
 }
@@ -69,7 +93,7 @@ void Stage::Draw()
 
     Transform tr;
     tr.position_ = { 0, 0, 0 };
-    //tr.scale_ = { 15.0f, 15.0f, 15.0f };
+    //tr.scale_ = { 5.0f, 5.0f, 5.0f };
     tr.rotate_ = { 0,0,0 };
     Model::SetTransform(hGround, tr);
     Model::Draw(hGround);
