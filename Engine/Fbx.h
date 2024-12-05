@@ -27,6 +27,7 @@ class Fbx
 
 	struct CONSTANT_BUFFER
 	{
+		XMMATRIX	matW;
 		XMMATRIX	matWVP;
 		XMMATRIX	matNormal;
 		XMFLOAT4	diffuseColor;
