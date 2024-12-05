@@ -24,8 +24,8 @@ cbuffer global
 //„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
 struct VS_OUT
 {
+    float4 wpos : POSITION; //ˆÊ’u
     float4 pos : SV_POSITION; //ˆÊ’u
-    float4 wpos : POSITION;
     float2 uv : TEXCOORD; //UVÀ•W
     float4 normal : NORMAL;
     //float4 col : COLOR;
