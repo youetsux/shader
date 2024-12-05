@@ -10,6 +10,7 @@ SamplerState g_sampler : register(s0); //サンプラー
 //───────────────────────────────────────
 cbuffer global
 {
+    float4x4 matW; // ワールド行列
     float4x4 matWVP; // ワールド・ビュー・プロジェクションの合成行列
     float4x4 matW; //ワールド変換マトリクス
     float4x4 matNormal; // ワールド行列
@@ -24,6 +25,7 @@ cbuffer global
 //───────────────────────────────────────
 struct VS_OUT
 {
+    float4 wpos : POSITION; //位置
     float4 pos : SV_POSITION; //位置
     float4 wpos : POSITION;
     float2 uv : TEXCOORD; //UV座標
