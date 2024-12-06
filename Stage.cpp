@@ -23,7 +23,7 @@ void Stage::Initialize()
     hModel_ = Model::Load("Assets\\Ball.fbx");
     hRoom_ = Model::Load("Assets\\room.fbx");
     hGround = Model::Load("Assets\\plane3.fbx");
-    hBunny_ = Model::Load("Assets\\stfb.fbx");
+    hBunny_ = Model::Load("Assets\\stanford-bunny.fbx");
     Camera::SetPosition(XMFLOAT3{ 0, 0.8, -2.8 });
     Camera::SetTarget(XMFLOAT3{ 0,0.8,0 });
 }
@@ -91,9 +91,10 @@ void Stage::Draw()
     Model::SetTransform(hRoom_, tr);
     Model::Draw(hRoom_);
 
-    Transform tbunny;
-    tbunny.scale_ = { 0.001,0.001,0.001 };
-    tbunny.position_ = { 0,0.3,0 };
+    static Transform tbunny;
+    tbunny.scale_ = { 1,1,1 };
+    tbunny.position_ = { 0,0.0,0 };
+    tbunny.rotate_.y += 0.1;
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
 }
