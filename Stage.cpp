@@ -2,6 +2,11 @@
 #include "Engine/Model.h"
 #include "Engine/Input.h"
 #include "Engine/Camera.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_dx11.h"
+#include "imgui/imgui_impl_win32.h"
+
+
 
 //コンストラクタ
 Stage::Stage(GameObject* parent)
@@ -97,6 +102,9 @@ void Stage::Draw()
     tbunny.rotate_.y += 0.1;
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
+
+    ImGui::Text("Rotate:%.3f", tbunny.rotate_.y);
+
 }
 
 //開放
