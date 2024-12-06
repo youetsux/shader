@@ -74,8 +74,9 @@ float4 PS(VS_OUT inData) : SV_Target
     if (isTextured == false)
     {
         diffuse =  diffuseColor * color * dTerm * factor.x;
-        //diffuse = float4(1.0, 1.0, 1.0, 1.0);
+        ////diffuse = float4(1.0, 1.0, 1.0, 1.0);
         ambient =  diffuseColor * ambentSource * factor.x;
+
     }
     else
     {
