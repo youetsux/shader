@@ -8,13 +8,31 @@
 
 
 
+void Stage::InitConstantBuffer()
+{
+    D3D11_BUFFER_DESC cb;
+    cb.ByteWidth = sizeof(CONSTBUFFER_STAGE);
+    cb.Usage = D3D11_USAGE_DYNAMIC;
+    cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb.MiscFlags = 0;
+    cb.StructureByteStride = 0;
+    HRESULT hr;
+    hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pConstantBuffer_);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "コンスタントバッファの作成に失敗しました", "エラー", MB_OK);
+    }
+}
+
 //コンストラクタ
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage")
+    :GameObject(parent, "Stage"), pConstantBuffer_(nullptr)
 {
     hModel_ = -1;
     hGround = -1;
-
+    hRoom_ = -1;
+    hBunny_ = -1;
 }
 
 //デストラクタ
@@ -28,9 +46,11 @@ void Stage::Initialize()
     hModel_ = Model::Load("Assets\\Ball.fbx");
     hRoom_ = Model::Load("Assets\\room.fbx");
     hGround = Model::Load("Assets\\plane3.fbx");
-    hBunny_ = Model::Load("Assets\\stanford-bunny.fbx");
+    hBunny_ = Model::Load("Assets\\Donut_phong.fbx");
     Camera::SetPosition(XMFLOAT3{ 0, 0.8, -2.8 });
     Camera::SetTarget(XMFLOAT3{ 0,0.8,0 });
+
+    InitConstantBuffer();
 }
 
 //更新
@@ -73,6 +93,8 @@ void Stage::Update()
         p = { p.x ,p.y - 0.01f, p.z,p.w };
         Direct3D::SetLightPos(p);
     }
+
+    //コンスタントバッファの設定と、シェーダーへのコンスタントバッファのセットを書くよ
 }
 
 //描画
@@ -97,8 +119,8 @@ void Stage::Draw()
     Model::Draw(hRoom_);
 
     static Transform tbunny;
-    tbunny.scale_ = { 1,1,1 };
-    tbunny.position_ = { 0,0.0,0 };
+    tbunny.scale_ = { 0.25,0.25,0.25 };
+    tbunny.position_ = { 0, 0.5, 0 };
     tbunny.rotate_.y += 0.1;
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
