@@ -229,11 +229,20 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 				HRESULT hr = pMaterialList_[i].pTexture->Load(texFile.string());
 				assert(hr == S_OK);
 			}
-			FbxSurfaceLambert* pMaterial = (FbxSurfaceLambert*)pNode->GetMaterial(i);
+			FbxSurfacePhong* pMaterial = (FbxSurfacePhong*)pNode->GetMaterial(i);
 			FbxDouble  diffuse = pMaterial->DiffuseFactor;
-			//diffuse = 1.0;
+			FbxDouble3  ambient = pMaterial->Ambient;
 			pMaterialList_[i].factor = XMFLOAT4((float)diffuse, (float)diffuse, (float)diffuse, (float)diffuse);
-			
+			pMaterialList_[i].ambient = { ambient[0], ambient[1], ambient[2], 1.0f };
+			//あなたはフォンのパラメータを持ってますか？
+			if (pMaterial->GetClassId().Is(FbxSurfacePhong::ClassId))
+			{
+				FbxDouble3 specular = pMaterial->Specular;
+				FbxDouble shininess = pMaterial->Shininess; //4つとも同じ値でセット
+			}
+			//ここで、自分のpMaterialList_[i]に値を設定
+
+
 		}
 
 		//テクスチャ無し
@@ -247,6 +256,8 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			//FbxSurfaceLambert* pMaterial = (FbxSurfaceLambert*)pNode->GetMaterial(i);
 			FbxDouble  factor = pMaterial->DiffuseFactor;
 			pMaterialList_[i].factor = XMFLOAT4((float)factor, (float)factor, (float)factor, (float)factor);
+			FbxDouble3  ambient = pMaterial->Ambient;
+			pMaterialList_[i].ambient = { ambient[0], ambient[1], ambient[2], 1.0f };
 		}
 	}
 }
