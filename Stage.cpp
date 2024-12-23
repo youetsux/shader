@@ -18,7 +18,20 @@ void Stage::InitConstantBuffer()
     cb.MiscFlags = 0;
     cb.StructureByteStride = 0;
     HRESULT hr;
-    hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pConstantBuffer_);
+    hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pCBStage_);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "コンスタントバッファの作成に失敗しました", "エラー", MB_OK);
+    }
+    D3D11_BUFFER_DESC cb2;
+    cb2.ByteWidth = sizeof(CONSTBUFFER_STAGE);
+    cb2.Usage = D3D11_USAGE_DYNAMIC;
+    cb2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb2.MiscFlags = 0;
+    cb2.StructureByteStride = 0;
+    
+    hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pCBSpot_);
     if (FAILED(hr))
     {
         MessageBox(NULL, "コンスタントバッファの作成に失敗しました", "エラー", MB_OK);
@@ -27,7 +40,7 @@ void Stage::InitConstantBuffer()
 
 //コンストラクタ
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), pConstantBuffer_(nullptr)
+    :GameObject(parent, "Stage"), pCBStage_(nullptr),pCBSpot_(nullptr)
 {
     hModel_ = -1;
     hGround = -1;
@@ -100,13 +113,28 @@ void Stage::Update()
     XMStoreFloat4(&cb.eyePosition, Camera::GetPosition());
     
     D3D11_MAPPED_SUBRESOURCE pdata;
-    Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
+    Direct3D::pContext_->Map(pCBStage_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
     memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
-    Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
+    Direct3D::pContext_->Unmap(pCBStage_, 0);	//再開
 
     //コンスタントバッファ
-    Direct3D::pContext_->VSSetConstantBuffers(1, 1, &pConstantBuffer_);	//頂点シェーダー用	
-    Direct3D::pContext_->PSSetConstantBuffers(1, 1, &pConstantBuffer_);	//ピクセルシェーダー用
+    Direct3D::pContext_->VSSetConstantBuffers(1, 1, &pCBStage_);	//頂点シェーダー用	
+    Direct3D::pContext_->PSSetConstantBuffers(1, 1, &pCBStage_);	//ピクセルシェーダー用
+
+    CONSTBUFFER_STAGE cb2;
+    cb2.lightPosition = {-1.0, 1.0, 2.0, 1.0};
+    XMStoreFloat4(&cb.eyePosition, Camera::GetPosition());
+    //コンスタントバッファ代入
+
+    D3D11_MAPPED_SUBRESOURCE pdata;
+    Direct3D::pContext_->Map(pCBSpot_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
+    memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb2), sizeof(cb2));	// データを値を送る
+    Direct3D::pContext_->Unmap(pCBSpot_, 0);	//再開
+
+    //コンスタントバッファ
+    Direct3D::pContext_->VSSetConstantBuffers(1, 1, &pCBSpot_);	//頂点シェーダー用	
+    Direct3D::pContext_->PSSetConstantBuffers(1, 1, &pCBSpot_);	//ピクセルシェーダー用
+
 
 
 }

@@ -5,7 +5,16 @@ struct CONSTBUFFER_STAGE
 {
     XMFLOAT4 lightPosition; //光源位置
     XMFLOAT4 eyePosition;//視点の位置
+    XMFLOAT4 pLightPosition;
+    XMFLOAT4 color;
+    XMFLOAT4 direction;
+    float theta;//theta phi<---<---theta--->--->phi
+    float phi;//phi phi<---<---theta--->--->phi
+    float att;
+    float toff;
 };
+
+
 
 //◆◆◆を管理するクラス
 class Stage : public GameObject
@@ -14,7 +23,8 @@ class Stage : public GameObject
     int hRoom_;
     int hGround;
     int hBunny_;
-    ID3D11Buffer* pConstantBuffer_;
+    ID3D11Buffer* pCBStage_;
+    ID3D11Buffer* pCBSpot_;
     void InitConstantBuffer();
 public:
     //コンストラクタ
