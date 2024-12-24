@@ -24,7 +24,7 @@ class Stage : public GameObject
     int hGround;
     int hBunny_;
     ID3D11Buffer* pCBStage_;
-    ID3D11Buffer* pCBSpot_;
+    //ID3D11Buffer* pCBSpot_;
     void InitConstantBuffer();
 public:
     //コンストラクタ

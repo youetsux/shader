@@ -26,6 +26,13 @@ cbuffer gStage:register(b1)
 {
     float4 lightPosition;
     float4 eyePosition;
+    float4 pLightposition;
+    float4 color;
+    float4 direction;
+    float theta;
+    float phi;
+    float att;
+    float toff;
 };
 
 //───────────────────────────────────────
@@ -73,33 +80,94 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 //───────────────────────────────────────
 float4 PS(VS_OUT inData) : SV_Target
 {
-    float4 diffuse;
-    float4 ambient;
-    float4 ambentSource = { 0.2, 0.2, 0.2, 1.0 };
-    float3 dir = normalize(lightPosition.xyz - inData.wpos.xyz); //ピクセル位置のポリゴンの3次元座標＝wpos
-    //inData.normal.z = 0;
-    float color = saturate(dot(normalize(inData.normal.xyz), dir));
-    float3 k = { 0.2f, 0.2f, 1.0f };
-    float len = length(lightPosition.xyz - inData.wpos.xyz);
-    float dTerm = 1.0 / (k.x + k.y*len + k.z*len*len);
+    //float4 diffuse;
+    //float4 ambient;
+    float4 ambientSource = { 0.1, 0.1, 0.1, 1.0 };
+    //float3 dir = normalize(lightPosition.xyz - inData.wpos.xyz); //ピクセル位置のポリゴンの3次元座標＝wpos
+    ////inData.normal.z = 0;
+    //float color = saturate(dot(normalize(inData.normal.xyz), dir));
+    //float3 k = { 0.2f, 0.2f, 1.0f };
+    //float len = length(lightPosition.xyz - inData.wpos.xyz);
+    //float dTerm = 1.0 / (k.x + k.y*len + k.z*len*len);
     
-    float4 R = reflect(normalize(inData.normal), normalize(float4(dir, 1.0)));
-    float4 specular = pow(saturate(dot(R, normalize(inData.eyev))), shininess) * specularColor;
+    //float4 R = reflect(normalize(inData.normal), normalize(float4(dir, 1.0)));
+    //float4 specular = pow(saturate(dot(R, normalize(inData.eyev))), shininess) * specularColor;
     
-    if (isTextured == false)
-    {
-        diffuse =  diffuseColor * color * dTerm * factor.x;
-        ////diffuse = float4(1.0, 1.0, 1.0, 1.0);
-        ambient =  diffuseColor * ambentSource;
+    //if (isTextured == false)
+    //{
+    //    diffuse =  diffuseColor * color * dTerm * factor.x;
+    //    ////diffuse = float4(1.0, 1.0, 1.0, 1.0);
+    //    ambient =  diffuseColor * ambentSource;
+    //}
+    //else
+    //{
+    //    diffuse =   g_texture.Sample(g_sampler, inData.uv) * color * dTerm*factor.x;
+    //    ambient = g_texture.Sample(g_sampler, inData.uv) * ambentSource;
 
-    }
-    else
-    {
-        diffuse =   g_texture.Sample(g_sampler, inData.uv) * color * dTerm*factor.x;
-        ambient = g_texture.Sample(g_sampler, inData.uv) * ambentSource;
+    //}
 
-    }
-
-    return diffuse +  specular + ambient;
+    //return diffuse +  specular + ambient;
     //return specular + ambient;
+    float3 spLightDir = normalize(pLightposition.xyz - inData.wpos.xyz);
+    float len = length(pLightposition.xyz - inData.wpos.xyz);
+    float attenuation = 1.0 / (att * len * len);
+
+    float3 spLightDirN = normalize(spLightDir.xyz);
+    float3 spor_dirN = normalize(direction.xyz);
+    float cos_alpha = dot(-spLightDir, spor_dirN);
+    float cos_half_theta = cos(radians(theta / 2.0));
+    float cos_half_phi = cos(radians(phi / 2.0));
+    
+    float4 res;
+    
+    if (cos_alpha <= cos_half_phi)
+        res = float4(0.0, 0, 0, 1.0);
+     else
+        res = cos_alpha;
+    
+    return res;
+    
+    //if (cos_alpha <= cos_half_phi)
+    //{
+    //    // out-range
+    //    // attenuation * 0.f;
+    //    if(isTextured == false)
+    //        res = ambientSource * ambientColor;
+    //    else
+    //        res = ambientSource * g_texture.Sample(g_sampler, inData.uv);
+    //    return res;
+    //}
+    //else
+    //{
+    //    if (cos_alpha > cos_half_theta)
+    //    {
+    //        // inner corn
+    //        // attenuation * 1.f
+    //    }
+    //    else
+    //    {
+    //        // outer corn
+    //        attenuation = pow((cos_alpha - cos_half_phi) / (cos_half_theta - cos_half_phi), toff);
+    //    }
+    //    inData.normal = 0;
+    //    float3 normal = inData.normal.xyz;
+    //    float3 light = spLightDirN;
+
+    //    float diffuse_power = clamp(dot(normal, light), 0.0, 1.0);
+        
+    //    float3 eye = normalize(inData.eyev);
+    //    //vec3 half_vec =  normalize(light + eye);
+    //    float3 refLight = reflect(light, normal);
+    //    float specular = pow(clamp(dot(eye, refLight), 0.0, 1.0), shininess);
+        
+    //    if (isTextured == false)
+    //        //res = diffuseColor* diffuse_power * attenuation + ambientColor* ambientSource +  specularColor*specular;
+    //        res = diffuse_power;
+    //    else
+    //        //res = g_texture.Sample(g_sampler, inData.uv) * diffuse_power * attenuation + ambientColor * ambientSource + specularColor * specular;
+    //        res = diffuse_power;
+
+    //}
+    //return res;
+    
 }
