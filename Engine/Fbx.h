@@ -28,6 +28,9 @@ class Fbx
 		XMFLOAT4 factor; //スカラ
 	};
 
+
+
+
 	struct CONSTBUFFER_MODEL
 	{
 		XMMATRIX	matWVP;//スクリーン変換マトリクス

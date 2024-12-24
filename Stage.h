@@ -14,6 +14,16 @@ struct CONSTBUFFER_STAGE
     float toff;
 };
 
+struct spotLightState
+{
+    XMFLOAT4 pLightPosition;
+    XMFLOAT4 color;
+    XMFLOAT4 direction;
+    float theta;//theta phi<---<---theta--->--->phi
+    float phi;//phi phi<---<---theta--->--->phi
+    float att;
+    float toff;
+};
 
 
 //◆◆◆を管理するクラス
@@ -26,6 +36,7 @@ class Stage : public GameObject
     ID3D11Buffer* pCBStage_;
     //ID3D11Buffer* pCBSpot_;
     void InitConstantBuffer();
+    spotLightState sptlight_;
 public:
     //コンストラクタ
     Stage(GameObject* parent);

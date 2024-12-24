@@ -108,66 +108,73 @@ float4 PS(VS_OUT inData) : SV_Target
 
     //return diffuse +  specular + ambient;
     //return specular + ambient;
+    
     float3 spLightDir = normalize(pLightposition.xyz - inData.wpos.xyz);
     float len = length(pLightposition.xyz - inData.wpos.xyz);
     float attenuation = 1.0 / (att * len * len);
 
-    float3 spLightDirN = normalize(spLightDir.xyz);
+    float3 spLightDirN = normalize(spLightDir);
     float3 spor_dirN = normalize(direction.xyz);
     float cos_alpha = dot(-spLightDir, spor_dirN);
     float cos_half_theta = cos(radians(theta / 2.0));
     float cos_half_phi = cos(radians(phi / 2.0));
-    
-    float4 res;
+    //diffuse‚ÌŒvŽZ
+    float4 diffuse;
+    float specular;
     
     if (cos_alpha <= cos_half_phi)
-        res = float4(0.0, 0, 0, 1.0);
-     else
-        res = cos_alpha;
-    
-    return res;
-    
-    //if (cos_alpha <= cos_half_phi)
-    //{
-    //    // out-range
-    //    // attenuation * 0.f;
-    //    if(isTextured == false)
-    //        res = ambientSource * ambientColor;
-    //    else
-    //        res = ambientSource * g_texture.Sample(g_sampler, inData.uv);
-    //    return res;
-    //}
-    //else
-    //{
-    //    if (cos_alpha > cos_half_theta)
-    //    {
-    //        // inner corn
-    //        // attenuation * 1.f
-    //    }
-    //    else
-    //    {
-    //        // outer corn
-    //        attenuation = pow((cos_alpha - cos_half_phi) / (cos_half_theta - cos_half_phi), toff);
-    //    }
-    //    inData.normal = 0;
-    //    float3 normal = inData.normal.xyz;
-    //    float3 light = spLightDirN;
-
-    //    float diffuse_power = clamp(dot(normal, light), 0.0, 1.0);
+    {
+        diffuse = float4(0, 0, 0, 1);
+        specular = float4(0, 0, 0, 1);
+    }
+    else
+    {
+        if (cos_alpha > cos_half_theta)
+        {
+            // inner corn
+            // attenuation * 1.f
+            attenuation = 1.0;
+        }
+        else
+        {
+            // outer corn
+            attenuation = pow((cos_alpha - cos_half_phi) / (cos_half_theta - cos_half_phi), toff);
+        }
+        inData.normal.w = 0;
+        diffuse = clamp(dot(spLightDirN, normalize(inData.normal.xyz)), 0.0, 1.0);
         
-    //    float3 eye = normalize(inData.eyev);
-    //    //vec3 half_vec =  normalize(light + eye);
-    //    float3 refLight = reflect(light, normal);
-    //    float specular = pow(clamp(dot(eye, refLight), 0.0, 1.0), shininess);
-        
-    //    if (isTextured == false)
-    //        //res = diffuseColor* diffuse_power * attenuation + ambientColor* ambientSource +  specularColor*specular;
-    //        res = diffuse_power;
-    //    else
-    //        //res = g_texture.Sample(g_sampler, inData.uv) * diffuse_power * attenuation + ambientColor * ambientSource + specularColor * specular;
-    //        res = diffuse_power;
+        //specular‚ÌŒvŽZ
 
-    //}
-    //return res;
+        float4 R = reflect(normalize(inData.normal), normalize(float4(spLightDirN, 1.0)));
+        float specularPower = pow(clamp(dot(R, normalize(inData.eyev)), 0.0, 1.0), shininess);
+        specular = specularColor * specularPower;
+    }
+    
+    if(isTextured == false)
+    {
+        diffuse = color * diffuse * diffuseColor;
+    }
+    else
+    {
+        diffuse = color * diffuse * g_texture.Sample(g_sampler, inData.uv);
+    }
+    
+
+    
+    
+    //ambient‚ÌŒvŽZ
+    float4 ambient;
+    if(isTextured == false)
+    {
+        ambient = diffuseColor * ambientSource;
+    }
+    else
+    {
+        ambient = g_texture.Sample(g_sampler, inData.uv) * ambientSource;
+    }
+    
+
+    return diffuse*attenuation + specular + ambient;
+ 
     
 }

@@ -49,6 +49,16 @@ void Stage::Initialize()
     hBunny_ = Model::Load("Assets\\Donut_phong.fbx");
     Camera::SetPosition(XMFLOAT3{ 0, 0.8, -2.8 });
     Camera::SetTarget(XMFLOAT3{ 0,0.8,0 });
+    sptlight_ =
+    {
+        Direct3D::GetLightPos(),
+        { 1.0f, 1.0f, 1.0f, 1.0f },
+        { 0, -1, 0, 0.0 },
+        40.0f,
+        50.0f,
+        0.1f,
+        1.0f
+    };
 
     InitConstantBuffer();
 }
@@ -93,20 +103,20 @@ void Stage::Update()
         p = { p.x ,p.y - 0.01f, p.z,p.w };
         Direct3D::SetLightPos(p);
     }
-
+    sptlight_.pLightPosition = Direct3D::GetLightPos();
     //コンスタントバッファの設定と、シェーダーへのコンスタントバッファのセットを書くよ
     CONSTBUFFER_STAGE cb;
     cb.lightPosition = Direct3D::GetLightPos();
     XMStoreFloat4(&cb.eyePosition, Camera::GetPosition());
     //cb.pLightPosition = { -1.0, 1.0, 2.0, 1.0 };
     //XMStoreFloat4(&cb.eyePosition, Camera::GetPosition());
-    cb.pLightPosition = Direct3D::GetLightPos();
-    cb.color = { 1.0f, 0.0f, 0.0f, 1.0f };
-    cb.direction = { 1, -1, 0, 0.0 };
-    cb.theta = 80.0f;
-    cb.phi = 90.0f;
-    cb.att = 0.1f;
-    cb.toff = 1.0f;
+    cb.pLightPosition = sptlight_.pLightPosition;
+    cb.color = sptlight_.color;
+    cb.direction = sptlight_.direction;
+    cb.theta = sptlight_.theta;
+    cb.phi = sptlight_.phi;
+    cb.att = sptlight_.att;
+    cb.toff = sptlight_.toff;
 
     D3D11_MAPPED_SUBRESOURCE pdata;
     Direct3D::pContext_->Map(pCBStage_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
@@ -144,8 +154,20 @@ void Stage::Draw()
     tbunny.rotate_.y += 0.1;
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
+    ImGui::BeginGroup();
+  
+    {
+        ImGui::Text("Spot Light");
+        ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.pLightPosition.x, sptlight_.pLightPosition.y, sptlight_.pLightPosition.z);
+        ImGui::Text("dir:%.3f,%.3f,%.3f", sptlight_.direction.x, sptlight_.direction.y, sptlight_.direction.z);
+        ImGui::EndGroup();
 
-    ImGui::Text("Rotate:%.3f", tbunny.rotate_.y);
+        ImGui::Text("phi:%.3f", sptlight_.phi);
+        ImGui::SliderFloat("phi", &sptlight_.phi, 1, 180);
+        float dirval[3] = { sptlight_.direction.x,sptlight_.direction.y, sptlight_.direction.z,};
+        ImGui::SliderFloat3("Light direction", dirval, -2.0, 2.0);
+        sptlight_.direction = XMFLOAT4(dirval);
+    }
 }
 
 //開放

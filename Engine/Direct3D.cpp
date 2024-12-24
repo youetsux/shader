@@ -421,7 +421,7 @@ void Direct3D::EndDraw()
 
 	//ImGui::Begin("TestWin");
 	
-	ImGui::Button("Button");
+	//ImGui::Button("Button");
 	//ImGui::End();
 	//ImGui::EndFrame();
 	ImGui::Render();

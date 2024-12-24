@@ -82,6 +82,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 		ImGui_ImplWin32_Init(hWnd);
 		ImGui_ImplDX11_Init(Direct3D::pDevice_, Direct3D::pContext_);
 		ImGui::StyleColorsLight();
+
 	}
 	
 
@@ -149,13 +150,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 
 			//▼描画
 			Direct3D::BeginDraw();
-
+			
 			//ルートジョブから、すべてのオブジェクトのドローを呼ぶ
 			pRootJob->DrawSub();
 
 			Direct3D::EndDraw();
 
-
+			
 		}
 	}
 
