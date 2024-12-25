@@ -243,11 +243,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 				pMaterialList_[i].specular = { (float)specular[0],(float)specular[1], (float)specular[2], 1.0f };
 				pMaterialList_[i].shininess = { (float)shininess,(float)shininess, (float)shininess, 1.0 };
 			}
-			
-
-
 		}
-
 		//テクスチャ無し
 		else
 		{
@@ -271,10 +267,9 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			}
 			else
 			{
-				pMaterialList_[i].specular = {0.0f,0.0f,0.0f,1.0f };
-				pMaterialList_[i].shininess = {10.0f,10.0f,10.0f, 1.0 };
+				pMaterialList_[i].specular = {0.0f, 0.0f, 0.0f, 1.0f };
+				pMaterialList_[i].shininess = {10.0f, 10.0f, 10.0f, 1.0 };
 			}
-
 		}
 	}
 }
@@ -285,7 +280,6 @@ void Fbx::Draw(Transform& transform)
 	Direct3D::SetShader(SHADER_POINT);
 	transform.Calclation();//トランスフォームを計算
 	
-
 	for (int i = 0; i < materialCount_; i++)
 	{
 		//コンスタントバッファに情報を渡す
@@ -313,7 +307,6 @@ void Fbx::Draw(Transform& transform)
 		UINT offset = 0;
 		Direct3D::pContext_->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
-
 		// インデックスバッファーをセット
 		stride = sizeof(int);
 		offset = 0;
@@ -322,7 +315,6 @@ void Fbx::Draw(Transform& transform)
 		//コンスタントバッファ
 		Direct3D::pContext_->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//頂点シェーダー用	
 		Direct3D::pContext_->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ピクセルシェーダー用
-
 
 		if (pMaterialList_[i].pTexture)
 		{

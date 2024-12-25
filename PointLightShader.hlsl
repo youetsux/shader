@@ -18,21 +18,20 @@ cbuffer gModel:register(b0)
     float4 ambientColor;
     float4 specularColor;
     float4 shininess;
-
     bool isTextured; //テクスチャーが貼られているかどうか
 };
 
 cbuffer gStage:register(b1)
 {
-    float4 lightPosition;
+    float4 lightPosition[5];
     float4 eyePosition;
     float4 pLightposition;
-    float4 color;
+    float4 pointLightColor[5];
+    float4 spotLightColor;
     float4 direction;
-    float theta;
-    float phi;
-    float att;
-    float toff;
+    float4 kTerm[5];
+    float4 sptParam;
+    int4 pointListSW[5];
 };
 
 //───────────────────────────────────────
@@ -75,40 +74,53 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
     return outData;
 }
 
+
+
 //───────────────────────────────────────
 // ピクセルシェーダ
 //───────────────────────────────────────
 float4 PS(VS_OUT inData) : SV_Target
 {
-    //float4 diffuse;
-    //float4 ambient;
+    float4 pt_diffuse = { 0, 0, 0, 1.0f };
+    float4 pt_ambient = { 0, 0, 0, 1.0f };
+    float4 pt_specular = { 0, 0, 0, 1.0f };
     float4 ambientSource = { 0.1, 0.1, 0.1, 1.0 };
-    //float3 dir = normalize(lightPosition.xyz - inData.wpos.xyz); //ピクセル位置のポリゴンの3次元座標＝wpos
-    ////inData.normal.z = 0;
-    //float color = saturate(dot(normalize(inData.normal.xyz), dir));
-    //float3 k = { 0.2f, 0.2f, 1.0f };
-    //float len = length(lightPosition.xyz - inData.wpos.xyz);
-    //float dTerm = 1.0 / (k.x + k.y*len + k.z*len*len);
+    for (int i = 0; i < 5; i++)
+    {
+        if (pointListSW[i].x == 1)
+        {
+            float3 dir = normalize(lightPosition[i].xyz - inData.wpos.xyz); //ピクセル位置のポリゴンの3次元座標＝wpos
+            inData.normal.w = 0;
+            float ptPower = saturate(dot(normalize(inData.normal.xyz), dir));
+            //float3 k = { 0.2f, 0.2f, 1.0f };
+            float len = length(lightPosition[i].xyz - inData.wpos.xyz);
+            float dTerm = 1.0 / (kTerm[i].x + kTerm[i].y * len + kTerm[i].z * len * len);
     
-    //float4 R = reflect(normalize(inData.normal), normalize(float4(dir, 1.0)));
-    //float4 specular = pow(saturate(dot(R, normalize(inData.eyev))), shininess) * specularColor;
+            float4 R = reflect(normalize(inData.normal), normalize(float4(dir, 1.0)));
+            pt_specular += pow(saturate(dot(R, normalize(inData.eyev))), shininess) * specularColor;
     
-    //if (isTextured == false)
-    //{
-    //    diffuse =  diffuseColor * color * dTerm * factor.x;
-    //    ////diffuse = float4(1.0, 1.0, 1.0, 1.0);
-    //    ambient =  diffuseColor * ambentSource;
-    //}
-    //else
-    //{
-    //    diffuse =   g_texture.Sample(g_sampler, inData.uv) * color * dTerm*factor.x;
-    //    ambient = g_texture.Sample(g_sampler, inData.uv) * ambentSource;
-
-    //}
+            if (isTextured == false)
+            {
+                pt_diffuse += diffuseColor * pointLightColor[i] * dTerm * factor.x;
+        ////diffuse = float4(1.0, 1.0, 1.0, 1.0);
+                pt_ambient += diffuseColor * ambientSource;
+            }
+            else
+            {
+                pt_diffuse += g_texture.Sample(g_sampler, inData.uv) * pointLightColor[i] * dTerm * factor.x;
+                pt_ambient += g_texture.Sample(g_sampler, inData.uv) * ambientSource;
+            }
 
     //return diffuse +  specular + ambient;
     //return specular + ambient;
-    
+        }
+
+    }
+
+    float theta = sptParam.x;
+    float phi = sptParam.y;
+    float att = sptParam.z;
+    float toff = sptParam.w;
     float3 spLightDir = normalize(pLightposition.xyz - inData.wpos.xyz);
     float len = length(pLightposition.xyz - inData.wpos.xyz);
     float attenuation = 1.0 / (att * len * len);
@@ -120,7 +132,7 @@ float4 PS(VS_OUT inData) : SV_Target
     float cos_half_phi = cos(radians(phi / 2.0));
     //diffuseの計算
     float4 diffuse;
-    float specular;
+    float4 specular;
     
     if (cos_alpha <= cos_half_phi)
     {
@@ -146,17 +158,17 @@ float4 PS(VS_OUT inData) : SV_Target
         //specularの計算
 
         float4 R = reflect(normalize(inData.normal), normalize(float4(spLightDirN, 1.0)));
-        float specularPower = pow(clamp(dot(R, normalize(inData.eyev)), 0.0, 1.0), shininess);
+        float4 specularPower = pow(clamp(dot(R, normalize(inData.eyev)), 0.0, 1.0), shininess);
         specular = specularColor * specularPower;
     }
     
     if(isTextured == false)
     {
-        diffuse = color * diffuse * diffuseColor;
+        diffuse = spotLightColor * diffuse * diffuseColor * factor.x;
     }
     else
     {
-        diffuse = color * diffuse * g_texture.Sample(g_sampler, inData.uv);
+        diffuse = spotLightColor * diffuse * g_texture.Sample(g_sampler, inData.uv) * factor.x;
     }
     
 
@@ -174,7 +186,12 @@ float4 PS(VS_OUT inData) : SV_Target
     }
     
 
-    return diffuse*attenuation + specular + ambient;
- 
-    
+   return diffuse*attenuation + pt_diffuse + pt_specular+ specular + ambient;
+    //if (pointListSW[1].x == 1)
+    //    return float4(1, 0, 0, 1.0);
+    //else
+    //    return float4(0, 0, 0, 1.0);
+   // return diffuse * attenuation + specular + ambient;
+    //return pLightposition[1];
+
 }

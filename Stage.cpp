@@ -11,13 +11,16 @@
 void Stage::InitConstantBuffer()
 {
     D3D11_BUFFER_DESC cb;
-    cb.ByteWidth = sizeof(CONSTBUFFER_STAGE);
+    CONSTBUFFER_STAGE m;
+    //cb.ByteWidth = sizeof(CONSTBUFFER_STAGE) + (sizeof(CONSTBUFFER_STAGE) % 16 == 0 ? 0 : 16 - sizeof(CONSTBUFFER_STAGE) % 16);
+    cb.ByteWidth = sizeof(m) + (sizeof(m) % 16 == 0 ? 0 : 16 - sizeof(m) % 16);
     cb.Usage = D3D11_USAGE_DYNAMIC;
     cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     cb.MiscFlags = 0;
     cb.StructureByteStride = 0;
     HRESULT hr;
+
     hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pCBStage_);
     if (FAILED(hr))
     {
@@ -59,7 +62,28 @@ void Stage::Initialize()
         0.1f,
         1.0f
     };
-
+    
+    ptlight_[0].lightPosition = { -0.5,  0.2, 0, 1.0 };
+    ptlight_[1].lightPosition = {  0.5,  0.2, 0, 1.0 };
+    ptlight_[2].lightPosition = { 0.0,  0.2, -0.2, 1.0 };
+    ptlight_[3].lightPosition = { 0, 0, 0, 1.0 };
+    ptlight_[4].lightPosition = { 0, 0, 0, 1.0 };
+    ptlight_[0].pointLightColor = { 1,0, 0, 1.0 };
+    ptlight_[1].pointLightColor = { 0, 1, 0, 1.0 };
+    ptlight_[2].pointLightColor = { 0, 0, 1, 1.0 };
+    ptlight_[3].pointLightColor = { 1, 1, 1, 1.0 };
+    ptlight_[4].pointLightColor = { 1, 1, 1, 1.0 };
+    ptlight_[0].kTerm = { 0.2f, 0.2f, 1.0f, 1.0f };
+    ptlight_[1].kTerm = { 0.2f, 0.2f, 1.0f, 1.0f };
+    ptlight_[2].kTerm = { 0.2f, 0.2f, 1.0f, 1.0f };
+    ptlight_[3].kTerm = { 0.2f, 0.2f, 1.0f, 1.0f };
+    ptlight_[4].kTerm = { 0.2f, 0.2f, 1.0f, 1.0f };
+    ptlight_[0].sw = 1;
+    ptlight_[1].sw = 1;
+    ptlight_[2].sw = 1;
+    ptlight_[3].sw = 0;
+    ptlight_[4].sw = 0;
+    
     InitConstantBuffer();
 }
 
@@ -103,24 +127,35 @@ void Stage::Update()
         p = { p.x ,p.y - 0.01f, p.z,p.w };
         Direct3D::SetLightPos(p);
     }
-    sptlight_.pLightPosition = Direct3D::GetLightPos();
+    sptlight_.LightPosition = Direct3D::GetLightPos();
     //コンスタントバッファの設定と、シェーダーへのコンスタントバッファのセットを書くよ
     CONSTBUFFER_STAGE cb;
-    cb.lightPosition = Direct3D::GetLightPos();
+    //spotlight
+    cb.sptLightPosition = sptlight_.LightPosition;
     XMStoreFloat4(&cb.eyePosition, Camera::GetPosition());
     //cb.pLightPosition = { -1.0, 1.0, 2.0, 1.0 };
     //XMStoreFloat4(&cb.eyePosition, Camera::GetPosition());
-    cb.pLightPosition = sptlight_.pLightPosition;
-    cb.color = sptlight_.color;
+    //cb.pLightPosition = sptlight_.pLightPosition;
+    cb.sptLightColor = sptlight_.color;
     cb.direction = sptlight_.direction;
-    cb.theta = sptlight_.theta;
-    cb.phi = sptlight_.phi;
-    cb.att = sptlight_.att;
-    cb.toff = sptlight_.toff;
+    cb.sptLightparam = { sptlight_.theta,
+                         sptlight_.phi,
+                         sptlight_.att,
+                         sptlight_.toff };
+    //pointlight
+    for (int i = 0; i < POINT_LIGHT_MAX; i++)
+    {
+        cb.pointlightPosition[i] = ptlight_[i].lightPosition;
+        cb.pointLightColor[i] = ptlight_[i].pointLightColor;
+        cb.kTerm[i] = ptlight_[i].kTerm;
+        cb.pointListSW[i] = { ptlight_[i].sw, 0, 0,0 };
+    }
 
     D3D11_MAPPED_SUBRESOURCE pdata;
     Direct3D::pContext_->Map(pCBStage_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
-    memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
+    ULONG cbsize =  sizeof(cb);
+
+    memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), cbsize);	// データを値を送る
     Direct3D::pContext_->Unmap(pCBStage_, 0);	//再開
 
     //コンスタントバッファ
@@ -155,20 +190,17 @@ void Stage::Draw()
     Model::Draw(hBunny_);
   
     {
-        ImGui::Begin("hello");
-        
         ImGui::Text("Spot Light");
-        ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.pLightPosition.x, sptlight_.pLightPosition.y, sptlight_.pLightPosition.z);
+        ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.LightPosition.x, sptlight_.LightPosition.y, sptlight_.LightPosition.z);
         ImGui::Text("dir:%.3f,%.3f,%.3f", sptlight_.direction.x, sptlight_.direction.y, sptlight_.direction.z);
 
         ImGui::Text("phi:%.3f", sptlight_.phi);
-        ImGui::SliderFloat("phi", &sptlight_.phi, 1, 180);
+        ImGui::SliderFloat("phi", &sptlight_.phi, sptlight_.theta, 180);
+        ImGui::SliderFloat("theta", &sptlight_.theta, 1, 180);
         float dirval[4] = { sptlight_.direction.x,sptlight_.direction.y, sptlight_.direction.z,};
         ImGui::SliderFloat3("Light direction", dirval, -2.0, 2.0);
         dirval[3] = 1.0;
-        sptlight_.direction = XMFLOAT4(dirval);
-       
-        ImGui::End();
+        sptlight_.direction = XMFLOAT4(dirval); 
     }
 }
 

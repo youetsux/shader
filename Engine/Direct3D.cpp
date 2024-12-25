@@ -44,8 +44,8 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	ZeroMemory(&scDesc, sizeof(scDesc));
 
 	//描画先のフォーマット
-	scDesc.BufferDesc.Width = 0;	//画面幅
-	scDesc.BufferDesc.Height = 0;	//画面高さ
+	scDesc.BufferDesc.Width = 0;	//画面幅 winW -> 0にした
+	scDesc.BufferDesc.Height = 0;	//画面高さwinH -> 0にした
 	scDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;	// 何色使えるか
 
 	//FPS（1/60秒に1回）
