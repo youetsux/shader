@@ -44,8 +44,8 @@ HRESULT Direct3D::Initialize(int winW, int winH, HWND hWnd)
 	ZeroMemory(&scDesc, sizeof(scDesc));
 
 	//描画先のフォーマット
-	scDesc.BufferDesc.Width = winW;		//画面幅
-	scDesc.BufferDesc.Height = winH;	//画面高さ
+	scDesc.BufferDesc.Width = 0;	//画面幅
+	scDesc.BufferDesc.Height = 0;	//画面高さ
 	scDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;	// 何色使えるか
 
 	//FPS（1/60秒に1回）
@@ -309,7 +309,6 @@ HRESULT Direct3D::InitShader2D()
 		MessageBox(NULL, "ラスタライザの作成に失敗しました", "エラー", MB_OK);
 		return hr;
 	}
-
 
 	return S_OK;
 }

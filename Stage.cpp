@@ -126,7 +126,6 @@ void Stage::Update()
     //コンスタントバッファ
     Direct3D::pContext_->VSSetConstantBuffers(1, 1, &pCBStage_);	//頂点シェーダー用	
     Direct3D::pContext_->PSSetConstantBuffers(1, 1, &pCBStage_);	//ピクセルシェーダー用
-
 }
 
 //描画
@@ -154,19 +153,22 @@ void Stage::Draw()
     tbunny.rotate_.y += 0.1;
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
-    ImGui::BeginGroup();
   
     {
+        ImGui::Begin("hello");
+        
         ImGui::Text("Spot Light");
         ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.pLightPosition.x, sptlight_.pLightPosition.y, sptlight_.pLightPosition.z);
         ImGui::Text("dir:%.3f,%.3f,%.3f", sptlight_.direction.x, sptlight_.direction.y, sptlight_.direction.z);
-        ImGui::EndGroup();
 
         ImGui::Text("phi:%.3f", sptlight_.phi);
         ImGui::SliderFloat("phi", &sptlight_.phi, 1, 180);
-        float dirval[3] = { sptlight_.direction.x,sptlight_.direction.y, sptlight_.direction.z,};
+        float dirval[4] = { sptlight_.direction.x,sptlight_.direction.y, sptlight_.direction.z,};
         ImGui::SliderFloat3("Light direction", dirval, -2.0, 2.0);
+        dirval[3] = 1.0;
         sptlight_.direction = XMFLOAT4(dirval);
+       
+        ImGui::End();
     }
 }
 
