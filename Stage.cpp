@@ -213,6 +213,11 @@ void Stage::Draw()
         ptlight_[0].sw = sw[0];
         ptlight_[1].sw = sw[1];
         ptlight_[2].sw = sw[2];
+        
+        ImGui::Separator();
+
+        ImGui::Text("deltaT:%.3f ms", Direct3D::GetDeltaT());
+
     }
 }
 

@@ -127,8 +127,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 				countFps = 0;
 				startTime = nowTime;
 			}
+			float dt = (nowTime - lastUpdateTime);
+			Direct3D::deltaT_ = dt;
 
-			if ((nowTime - lastUpdateTime) * 60 <= 1000)
+			if ( dt * 60 <= 1000)
 			{
 				continue;
 			}
