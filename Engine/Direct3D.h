@@ -25,7 +25,8 @@ namespace Direct3D
 {
 	extern ID3D11Device* pDevice_;			//デバイス
 	extern ID3D11DeviceContext* pContext_;	//デバイスコンテキスト
-
+	extern float deltaT_;
+	
 	//初期化
 	HRESULT Initialize(int winW, int winH, HWND hWnd);
 
@@ -48,4 +49,5 @@ namespace Direct3D
 
 	XMFLOAT4 GetLightPos();
 	void SetLightPos(XMFLOAT4 pos);
+	extern float GetDeltaT();
 };

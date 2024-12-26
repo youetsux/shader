@@ -190,17 +190,29 @@ void Stage::Draw()
     Model::Draw(hBunny_);
   
     {
-        ImGui::Text("Spot Light");
-        ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.LightPosition.x, sptlight_.LightPosition.y, sptlight_.LightPosition.z);
-        ImGui::Text("dir:%.3f,%.3f,%.3f", sptlight_.direction.x, sptlight_.direction.y, sptlight_.direction.z);
+        ImGui::Text("Spot Light Params");
 
-        ImGui::Text("phi:%.3f", sptlight_.phi);
-        ImGui::SliderFloat("phi", &sptlight_.phi, sptlight_.theta, 180);
+        ImGui::SliderFloat("phi(theta < phi)", &sptlight_.phi, sptlight_.theta, 180);
         ImGui::SliderFloat("theta", &sptlight_.theta, 1, 180);
         float dirval[4] = { sptlight_.direction.x,sptlight_.direction.y, sptlight_.direction.z,};
         ImGui::SliderFloat3("Light direction", dirval, -2.0, 2.0);
         dirval[3] = 1.0;
         sptlight_.direction = XMFLOAT4(dirval); 
+        ImGui::Separator();
+        ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.LightPosition.x, sptlight_.LightPosition.y, sptlight_.LightPosition.z);
+        ImGui::Text("dir:%.3f,%.3f,%.3f", sptlight_.direction.x, sptlight_.direction.y, sptlight_.direction.z);
+        ImGui::Text("phi:%.3f", sptlight_.phi);
+
+        ImGui::Separator();
+        ImGui::Text("Point Lights Switch");
+        bool sw[3] = { (bool)ptlight_[0].sw,(bool)ptlight_[1].sw, (bool)ptlight_[2].sw };
+        ImGui::Columns(3, NULL, true);
+        ImGui::Checkbox("pLight0", &sw[0]);  ImGui::NextColumn();
+        ImGui::Checkbox("pLight1", &sw[1]);  ImGui::NextColumn();
+        ImGui::Checkbox("pLight2", &sw[2]);  ImGui::NextColumn();
+        ptlight_[0].sw = sw[0];
+        ptlight_[1].sw = sw[1];
+        ptlight_[2].sw = sw[2];
     }
 }
 

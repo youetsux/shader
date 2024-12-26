@@ -27,6 +27,8 @@ namespace Direct3D
 	};
 	SHADER_BUNDLE shaderBundle[SHADER_MAX];
 	XMFLOAT4 lightPos{ 0, 0.5, 0, 0 };
+	float deltaT_;
+	float GetDeltaT() { return deltaT_; }
 }
 
 
