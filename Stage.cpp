@@ -6,7 +6,11 @@
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
 
-
+namespace
+{
+    XMFLOAT4  lpos_backup[POINT_LIGHT_MAX];
+    bool isRoateLight = false;
+}
 
 void Stage::InitConstantBuffer()
 {
@@ -41,6 +45,7 @@ Stage::Stage(GameObject* parent)
 //デストラクタ
 Stage::~Stage()
 {
+
 }
 
 //初期化
@@ -84,6 +89,11 @@ void Stage::Initialize()
     ptlight_[3].sw = 0;
     ptlight_[4].sw = 0;
     
+
+    for (int i = 0; i < POINT_LIGHT_MAX; i++)
+    {
+        lpos_backup[i] = ptlight_[i].lightPosition;
+    }
     InitConstantBuffer();
 }
 
@@ -188,7 +198,30 @@ void Stage::Draw()
     tbunny.rotate_.y += 0.1;
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
-  
+
+    static float lightRotAngle = 0;
+    XMVECTOR pt[POINT_LIGHT_MAX];
+    if (isRoateLight) {
+        for (int i = 0; i < POINT_LIGHT_MAX; i++)
+        {
+            pt[i] = XMLoadFloat4(&lpos_backup[i]);
+        }
+        XMMATRIX yrot = XMMatrixRotationY(lightRotAngle);
+        for (int i = 0; i < POINT_LIGHT_MAX; i++)
+        {
+            //ptlight_[i].lightPosition = XMVector3TransformCoord(pt[i], yrot);
+            XMStoreFloat4(&(ptlight_[i].lightPosition),
+                XMVector3TransformCoord(pt[i], yrot));
+        }
+    }
+    else
+    {
+        for (int i = 0; i < POINT_LIGHT_MAX; i++)
+        {
+           ptlight_[i].lightPosition = lpos_backup[i];
+        }
+    }
+
     {
         ImGui::Text("Spot Light Params");
 
@@ -204,7 +237,9 @@ void Stage::Draw()
         ImGui::Text("phi:%.3f", sptlight_.phi);
 
         ImGui::Separator();
+
         ImGui::Text("Point Lights Switch");
+        ImGui::Separator();
         bool sw[3] = { (bool)ptlight_[0].sw,(bool)ptlight_[1].sw, (bool)ptlight_[2].sw };
         ImGui::Columns(3, NULL, true);
         ImGui::Checkbox("pLight0", &sw[0]);  ImGui::NextColumn();
@@ -213,11 +248,12 @@ void Stage::Draw()
         ptlight_[0].sw = sw[0];
         ptlight_[1].sw = sw[1];
         ptlight_[2].sw = sw[2];
-        
+        ImGui::Columns(1);
         ImGui::Separator();
 
-        ImGui::Text("deltaT:%.3f ms", Direct3D::GetDeltaT());
-
+        lightRotAngle += Direct3D::GetDeltaT() / 1000;
+        //mGui::Text("deltaT:%.2f ms", lightRotAngle);
+        ImGui::Checkbox("Rotation Light", &isRoateLight);
     }
 }
 
