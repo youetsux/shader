@@ -186,7 +186,9 @@ float4 PS(VS_OUT inData) : SV_Target
     }
     
 
-   return diffuse*attenuation + pt_diffuse + pt_specular+ specular + ambient;
+    //return clamp(diffuse * attenuation + pt_diffuse + pt_specular + specular + ambient, 0.0f, 1.0f);
+    return pt_diffuse;
+    //return g_texture.Sample(g_sampler, inData.uv);
     //if (pointListSW[1].x == 1)
     //    return float4(1, 0, 0, 1.0);
     //else
