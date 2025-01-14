@@ -8,14 +8,24 @@ SamplerState	g_sampler : register(s0);	//サンプラー
 // コンスタントバッファ
 // DirectX 側から送信されてくる、ポリゴン頂点以外の諸情報の定義
 //───────────────────────────────────────
-cbuffer global
+cbuffer gModel : register(b0)
 {
-	float4x4	matWVP;			// ワールド・ビュー・プロジェクションの合成行列
-	float4x4	matNormal;           // ワールド行列
-	float4		diffuseColor;		//マテリアルの色＝拡散反射係数tt
-    float4		lightPosition;
-    float2		factor;
-	bool		isTextured;			//テクスチャーが貼られているかどうか
+    float4x4 matWVP; // ワールド・ビュー・プロジェクションの合成行列
+    float4x4 matW; //ワールド変換マトリクス
+    float4x4 matNormal; // ワールド行列
+    float4 diffuseColor; //マテリアルの色＝拡散反射係数tt
+    float4 factor;
+    float4 ambientColor;
+    float4 specularColor;
+    float4 shininess;
+
+    bool isTextured; //テクスチャーが貼られているかどうか
+};
+
+cbuffer gStage : register(b1)
+{
+    float4 lightPosition;
+    float4 eyePosition;
 };
 
 //───────────────────────────────────────

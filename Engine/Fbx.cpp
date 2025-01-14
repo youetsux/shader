@@ -58,6 +58,10 @@ HRESULT Fbx::Load(std::string fileName)
 
 	//マネージャ解放
 	pFbxManager->Destroy();
+
+	pToonTex_ = new Texture;
+	pToonTex_->Load("Assets//toon.png");
+
 	return S_OK;
 }
 
@@ -333,6 +337,12 @@ void Fbx::Draw(Transform& transform)
 			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pTexture->GetSRV();
 			Direct3D::pContext_->PSSetShaderResources(0, 1, &pSRV);
 		}
+
+		ID3D11SamplerState* pSampler = pToonTex_->GetSampler();
+		ID3D11ShaderResourceView* pSRV = pToonTex_->GetSRV();
+		Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
+		Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
+
 
 		//描画
 		Direct3D::pContext_->DrawIndexed(indexCount_[i], 0, 0);
