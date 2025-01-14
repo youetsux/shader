@@ -12,9 +12,9 @@ void Stage::InitConstantBuffer()
 {
     D3D11_BUFFER_DESC cb;
     cb.ByteWidth = sizeof(CONSTBUFFER_STAGE);
-    cb.Usage = D3D11_USAGE_DYNAMIC;
+    cb.Usage = D3D11_USAGE_DEFAULT;
     cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb.CPUAccessFlags = 0;
     cb.MiscFlags = 0;
     cb.StructureByteStride = 0;
     HRESULT hr;
@@ -99,10 +99,13 @@ void Stage::Update()
     cb.lightPosition = Direct3D::GetLightPos();
     XMStoreFloat4(&cb.eyePosition, Camera::GetPosition());
     
-    D3D11_MAPPED_SUBRESOURCE pdata;
-    Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
-    memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
-    Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
+    //D3D11_MAPPED_SUBRESOURCE pdata;
+    //Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
+    //memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
+    //Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
+
+    Direct3D::pContext_->UpdateSubresource(pConstantBuffer_,
+        0, NULL, &cb, 0, 0);
 
     //コンスタントバッファ
     Direct3D::pContext_->VSSetConstantBuffers(1, 1, &pConstantBuffer_);	//頂点シェーダー用	
@@ -129,8 +132,8 @@ void Stage::Draw()
     //Model::SetTransform(hGround, tr);
     //Model::Draw(hGround);
 
-    Model::SetTransform(hRoom_, tr);
-    Model::Draw(hRoom_);
+    //Model::SetTransform(hRoom_, tr);
+    //Model::Draw(hRoom_);
 
     static Transform tbunny;
     tbunny.scale_ = { 0.25,0.25,0.25 };
@@ -139,7 +142,7 @@ void Stage::Draw()
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
 
-    ImGui::Text("Rotate:%.3f", tbunny.rotate_.y);
+   // ImGui::Text("Rotate:%.3f", tbunny.rotate_.y);
 
 }
 

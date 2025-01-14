@@ -54,7 +54,8 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	//スクリーン座標に変換し、ピクセルシェーダーへ
     outData.pos = mul(pos, matWVP);
     outData.uv = uv;
-
+    
+    normal.w = 0;
     outData.normal = mul(normal, matNormal);
 	//float4 light = float4(0, 1, -1, 0);
     float4 light = lightPosition;
@@ -78,7 +79,7 @@ float4 PS(VS_OUT inData) : SV_Target
     float NL = saturate(dot(inData.normal, normalize(lightPosition)));
 
     float2 uv = float2(NL, 0);
-    float4 tI = g_toon_texture.Sample(g_sampler, uv);
+    float4 tI = g_toon_texture.Sample(g_toon_sampler, uv);
 
     if (isTextured == false)
     {

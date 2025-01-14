@@ -18,6 +18,9 @@
     <Filter Include="ヘッダーファイル\Engine">
       <UniqueIdentifier>{781800bf-0886-4a69-a355-7df3c6979e71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダーファイル\imgui">
+      <UniqueIdentifier>{ae240435-9720-4a58-a9d4-8a9f74628382}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -95,6 +98,7 @@
     <FxCompile Include="Simple2D.hlsl" />
     <FxCompile Include="PointLightShader.hlsl" />
     <FxCompile Include="toonShader.hlsl" />
+    <FxCompile Include="OutLineShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Camera.h">
@@ -145,14 +149,30 @@
     <ClInclude Include="Stage.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_impl_dx11.h" />
-    <ClInclude Include="imgui\imgui_impl_win32.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_dx11.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_win32.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>ヘッダーファイル\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -75,14 +75,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 		PostQuitMessage(0); //エラー起きたら強制終了
 	}
 
-	{
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO();
-		ImGui_ImplWin32_Init(hWnd);
-		ImGui_ImplDX11_Init(Direct3D::pDevice_, Direct3D::pContext_);
-		ImGui::StyleColorsLight();
-	}
+	//{
+	//	IMGUI_CHECKVERSION();
+	//	ImGui::CreateContext();
+	//	ImGuiIO& io = ImGui::GetIO();
+	//	ImGui_ImplWin32_Init(hWnd);
+	//	ImGui_ImplDX11_Init(Direct3D::pDevice_, Direct3D::pContext_);
+	//	ImGui::StyleColorsLight();
+	//}
 	
 
 
@@ -177,8 +177,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 //ウィンドウプロシージャ（何かあった時によばれる関数）
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-		return true;
+	//if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+	//	return true;
 
 	switch (msg)
 	{
