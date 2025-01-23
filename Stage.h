@@ -47,6 +47,7 @@ class Stage : public GameObject
     int hRoom_;
     int hGround;
     int hBunny_;
+    bool isRotate_;//メインのオブジェクトの回転可否
     ID3D11Buffer* pCBStage_;
     //ID3D11Buffer* pCBSpot_;
     void InitConstantBuffer();

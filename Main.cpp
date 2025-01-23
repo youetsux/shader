@@ -79,8 +79,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     
+		// キーボードによるナビゲーションの有効化
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+		// コントローラーによるナビゲーションの有効化
 		ImGui_ImplWin32_Init(hWnd);
-		ImGui_ImplDX11_Init(Direct3D::pDevice_, Direct3D::pContext_);
+		ImGui_ImplDX11_Init(Direct3D::pDevice_, 
+			Direct3D::pContext_);
 		ImGui::StyleColorsLight();
 	}
 	

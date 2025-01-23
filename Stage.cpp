@@ -34,7 +34,8 @@ void Stage::InitConstantBuffer()
 
 //コンストラクタ
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), pCBStage_(nullptr)
+    :GameObject(parent, "Stage"), pCBStage_(nullptr),
+    isRotate_(true)
 {
     hModel_ = -1;
     hGround = -1;
@@ -193,9 +194,13 @@ void Stage::Draw()
     Model::Draw(hRoom_);
 
     static Transform tbunny;
-    tbunny.scale_ = { 0.25,0.25,0.25 };
-    tbunny.position_ = { 0, 0.5, 0 };
-    tbunny.rotate_.y += 0.1;
+    //tbunny.scale_ = { 0.25,0.25,0.25 };
+    //tbunny.position_ = { 0, 0.5, 0 };
+
+    if(isRotate_)
+        tbunny.rotate_.y += 2;//ドーナツの回転
+    
+    
     Model::SetTransform(hBunny_, tbunny);
     Model::Draw(hBunny_);
 
@@ -223,38 +228,64 @@ void Stage::Draw()
     }
 
     {
-        ImGui::Text("Spot Light Params");
-
-        ImGui::SliderFloat("phi(theta < phi)", &sptlight_.phi, sptlight_.theta, 180);
-        ImGui::SliderFloat("theta", &sptlight_.theta, 1, 180);
-        float dirval[4] = { sptlight_.direction.x,sptlight_.direction.y, sptlight_.direction.z,};
-        ImGui::SliderFloat3("Light direction", dirval, -2.0, 2.0);
-        dirval[3] = 1.0;
-        sptlight_.direction = XMFLOAT4(dirval); 
+        ////  デモウィンドウの描画
+        //ImGui::ShowDemoWindow();
+        static string text;
+        ImGui::Text("This is My Original Shader");
         ImGui::Separator();
-        ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.LightPosition.x, sptlight_.LightPosition.y, sptlight_.LightPosition.z);
-        ImGui::Text("dir:%.3f,%.3f,%.3f", sptlight_.direction.x, sptlight_.direction.y, sptlight_.direction.z);
-        ImGui::Text("phi:%.3f", sptlight_.phi);
-
-        ImGui::Separator();
-
-        ImGui::Text("Point Lights Switch");
-        ImGui::Separator();
-        bool sw[3] = { (bool)ptlight_[0].sw,(bool)ptlight_[1].sw, (bool)ptlight_[2].sw };
-        ImGui::Columns(3, NULL, true);
-        ImGui::Checkbox("pLight0", &sw[0]);  ImGui::NextColumn();
-        ImGui::Checkbox("pLight1", &sw[1]);  ImGui::NextColumn();
-        ImGui::Checkbox("pLight2", &sw[2]);  ImGui::NextColumn();
-        ptlight_[0].sw = sw[0];
-        ptlight_[1].sw = sw[1];
-        ptlight_[2].sw = sw[2];
-        ImGui::Columns(1);
-        ImGui::Separator();
-
-        lightRotAngle += Direct3D::GetDeltaT() / 1000;
-        //mGui::Text("deltaT:%.2f ms", lightRotAngle);
-        ImGui::Checkbox("Rotation Light", &isRoateLight);
+        ImGui::Text("Model Pos => (%5.2lf, %5.2lf, %5.2lf)",
+            tbunny.position_.x,
+            tbunny.position_.y,
+            tbunny.position_.z);
+        ImGui::Text("Model rotate => %5.3lf", tbunny.rotate_.y);
+        ImGui::Checkbox("Rotate Switch", &isRotate_);
+        if(ImGui::Button("Rotate Light"))
+        {
+            isRotate_ = !isRotate_;
+  
+        }
+        ImGui::InputText("input:", text.data(), 255);
+        ImGui::Text(text.c_str());
+        static float pos[3] = { 0,0,0 };
+        if (ImGui::InputFloat3("Position", pos, "%.3f")) {
+            tbunny.position_ = { pos[0],pos[1],pos[2] };
+        }
+        static float scl = 0.25;
+        if (ImGui::SliderFloat("scale", &scl, 0.01, 2, "%.3f"))
+        {
+            tbunny.scale_ = { scl, scl, scl };
+        }
     }
+
+    //{
+    //    ImGui::Text("Spot Light Params");
+    //    ImGui::SliderFloat("phi(theta < phi)", &sptlight_.phi, sptlight_.theta, 180);
+    //    ImGui::SliderFloat("theta", &sptlight_.theta, 1, 180);
+    //    float dirval[4] = { sptlight_.direction.x,sptlight_.direction.y, sptlight_.direction.z,};
+    //    ImGui::SliderFloat3("Light direction", dirval, -2.0, 2.0);
+    //    dirval[3] = 1.0;
+    //    sptlight_.direction = XMFLOAT4(dirval); 
+    //    ImGui::Separator();
+    //    ImGui::Text("pos:%.3f,%.3f,%.3f", sptlight_.LightPosition.x, sptlight_.LightPosition.y, sptlight_.LightPosition.z);
+    //    ImGui::Text("dir:%.3f,%.3f,%.3f", sptlight_.direction.x, sptlight_.direction.y, sptlight_.direction.z);
+    //    ImGui::Text("phi:%.3f", sptlight_.phi);
+    //    ImGui::Separator();
+    //    ImGui::Text("Point Lights Switch");
+    //    ImGui::Separator();
+    //    bool sw[3] = { (bool)ptlight_[0].sw,(bool)ptlight_[1].sw, (bool)ptlight_[2].sw };
+    //    ImGui::Columns(3, NULL, true);
+    //    ImGui::Checkbox("pLight0", &sw[0]);  ImGui::NextColumn();
+    //    ImGui::Checkbox("pLight1", &sw[1]);  ImGui::NextColumn();
+    //    ImGui::Checkbox("pLight2", &sw[2]);  ImGui::NextColumn();
+    //    ptlight_[0].sw = sw[0];
+    //    ptlight_[1].sw = sw[1];
+    //    ptlight_[2].sw = sw[2];
+    //    ImGui::Columns(1);
+    //    ImGui::Separator();
+    //    lightRotAngle += Direct3D::GetDeltaT() / 1000;
+    //    //mGui::Text("deltaT:%.2f ms", lightRotAngle);
+    //    ImGui::Checkbox("Rotation Light", &isRoateLight);
+    //}
 }
 
 //開放
