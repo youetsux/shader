@@ -79,7 +79,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
-		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   
+		//   
 		// キーボードによるナビゲーションの有効化
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 		// コントローラーによるナビゲーションの有効化

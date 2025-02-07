@@ -25,12 +25,17 @@ HRESULT Fbx::Load(std::string fileName)
 	FbxScene* pFbxScene = FbxScene::Create(pFbxManager, "fbxscene");
 	fbxImporter->Import(pFbxScene);
 	fbxImporter->Destroy();
+	//FbxGeometryConverter geometryConverter(pFbxManager);
+	//geometryConverter.SplitMeshesPerMaterial(pFbxScene, true);
 
 	//メッシュ情報を取得
 	FbxNode* rootNode = pFbxScene->GetRootNode();
 	FbxNode* pNode = rootNode->GetChild(0);
 	FbxMesh* mesh = pNode->GetMesh();
-
+	mesh->SplitPoints(FbxLayerElement::eTextureDiffuse);
+	//mesh->SplitPoints(FbxLayerElement::eMaterial);
+	
+	
 	//各情報の個数を取得
 	vertexCount_ = mesh->GetControlPointsCount();	//頂点の数
 	polygonCount_ = mesh->GetPolygonCount();	//ポリゴンの数
@@ -67,6 +72,9 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 	//頂点情報を入れる配列
 	VERTEX* vertices = new VERTEX[vertexCount_];
 
+	//int nNum = mesh->GetElementNormalCount();
+	//int tNum = mesh->GetElementTangentCount();//メッシュに含まれるタンジェント情報の数を数える
+
 	//全ポリゴン
 	for (DWORD poly = 0; poly < polygonCount_; poly++)
 	{
@@ -81,11 +89,24 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 			vertices[index].position = XMVectorSet((float)pos[0], (float)pos[1], -(float)pos[2], 0.0f);
 
 			//頂点のUV
-			FbxLayerElementUV* pUV = mesh->GetLayer(0)->GetUVs();
-			int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
-			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
-			vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0 - uv.mData[1]), 0.0f, 0.0f);
 
+			FbxLayerElementUV* pUV = mesh->GetLayer(0)->GetUVs();
+
+			if (pUV->GetReferenceMode() == FbxLayerElement::eIndexToDirect) {
+				int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
+				FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
+				vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0 - uv.mData[1]), 0.0f, 0.0f);
+			}
+			else if (pUV->GetReferenceMode() == FbxLayerElement::eDirect) {
+				FbxVector2 vUV;
+				bool res = true;
+				FbxStringList sUVSetNames;
+				mesh->GetUVSetNames(sUVSetNames);
+				FbxString sUVSetName = sUVSetNames.GetStringAt(0);
+				mesh->GetPolygonVertexUV(poly, vertex, sUVSetName, vUV, res);
+				int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
+				vertices[index].uv = XMVectorSet((float)vUV[0], (float)(1.0 - vUV[1]), 0.0f, 0.0f);
+			}
 
 			FbxLayerElementNormal* leNormal = mesh->GetLayer(0)->GetNormals();
 			FbxLayerElement::EMappingMode mp = leNormal->GetMappingMode();
@@ -98,6 +119,27 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 			vertices[index].normal = XMVectorSet((float)Normal[0], (float)Normal[1], -(float)Normal[2], 0.0f);
 		}
 	}
+
+	//////////////////////////    タンジェント情報の取得   ////////////////////////////
+
+	FbxGeometryElementTangent* t = mesh->GetElementTangent(0);
+	for (DWORD poly = 0; poly < polygonCount_; poly++)
+	{
+		FbxVector4 tangent{ 0, 0, 0, 0 };
+		//調べる頂点の番号
+		int index = mesh->GetPolygonVertexIndex(poly);
+		if (t != nullptr)
+		{
+			tangent = t->GetDirectArray().GetAt(index).mData;
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			int rIndex = mesh->GetPolygonVertices()[index + i];
+			vertices[rIndex].tangent = XMVectorSet((float)tangent[0], (float)tangent[1], (float)tangent[2], 0.0f);
+		}
+	}
+
+	//////////////////////////    タンジェント情報の取得   ////////////////////////////
 
 	//頂点バッファ
 	HRESULT hr;
@@ -191,6 +233,7 @@ void Fbx::IntConstantBuffer()
 		MessageBox(NULL, "コンスタントバッファの作成に失敗しました", "エラー", MB_OK);
 	}
 }
+
 namespace fs = std::filesystem;
 void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 {
@@ -219,14 +262,15 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			//_splitpath_s(textureFilePath, nullptr, 0, nullptr, 0, name, _MAX_FNAME, ext, _MAX_EXT);
 			//wsprintf(name, "%s%s", name, ext);
 			fs::path texFile(textureFilePath);
+			fs::path filename = texFile.filename();
 			//FbxFileTexture* textureInfo = lProperty.GetSrcObject<FbxFileTexture>(0);
 			//const char* textureFilePath = textureInfo->GetRelativeFileName();
 
 			//ファイルからテクスチャ作成
-			if (fs::is_regular_file(texFile))
+			if (fs::is_regular_file(filename))
 			{
 				pMaterialList_[i].pTexture = new Texture;
-				HRESULT hr = pMaterialList_[i].pTexture->Load(texFile.string());
+				HRESULT hr = pMaterialList_[i].pTexture->Load(filename.string());
 				assert(hr == S_OK);
 			}
 			FbxSurfacePhong* pMaterial = (FbxSurfacePhong*)pNode->GetMaterial(i);
@@ -271,6 +315,36 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 				pMaterialList_[i].shininess = {10.0f, 10.0f, 10.0f, 1.0 };
 			}
 		}
+		/////////   ノーマルテクスチャの読み込み関連    ////////////
+		{
+			//テクスチャ情報
+			FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sBump);
+			int texCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
+			if (texCount > 0)
+			{
+				//ノーマルテクスチャを読む
+				FbxFileTexture* textureInfo = lProperty.GetSrcObject<FbxFileTexture>(0);
+				const char* textureFilePath = textureInfo->GetRelativeFileName();
+
+				//ファイル名+拡張だけにする
+				fs::path texFile(textureFilePath);
+				fs::path filename = texFile.filename();
+				//ファイルからテクスチャ作成
+				if (fs::is_regular_file(filename))
+				{
+					pMaterialList_[i].pNormalMap = new Texture;
+					HRESULT hr = pMaterialList_[i].pNormalMap->Load(filename.string());
+					assert(hr == S_OK);
+				}
+			}
+			else
+			{
+				//ノーマルマップはなかったよ
+				pMaterialList_[i].pNormalMap = nullptr;
+			}
+
+		}
+		/////////   ノーマルテクスチャの読み込み関連    ////////////
 	}
 }
 
@@ -295,6 +369,10 @@ void Fbx::Draw(Transform& transform)
 		cb.diffuseFactor = pMaterialList_[i].factor;
 		int val = (int)(pMaterialList_[i].pTexture != nullptr);
 		cb.isTextured = {val,val,val,val};
+		//
+		int nVal = (int)(pMaterialList_[i].pNormalMap != nullptr);
+		cb.isNormalMapped = { nVal, nVal, nVal, nVal };
+		
 	
 		D3D11_MAPPED_SUBRESOURCE pdata;
 		Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
@@ -324,6 +402,16 @@ void Fbx::Draw(Transform& transform)
 
 			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pTexture->GetSRV();
 			Direct3D::pContext_->PSSetShaderResources(0, 1, &pSRV);
+		}
+
+		if (pMaterialList_[i].pNormalMap)
+		{
+			//サンプラーを1個追加したの忘れんなよ
+			ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalMap->GetSampler();
+			Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
+
+			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalMap->GetSRV();
+			Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
 		}
 
 		//描画

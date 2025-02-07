@@ -55,7 +55,7 @@ void Stage::Initialize()
     hModel_ = Model::Load("Assets\\Ball.fbx");
     hRoom_ = Model::Load("Assets\\room.fbx");
     hGround = Model::Load("Assets\\plane3.fbx");
-    hBunny_ = Model::Load("Assets\\Donut_phong.fbx");
+    hBunny_ = Model::Load("Assets\\ishigaki.fbx");
     Camera::SetPosition(XMFLOAT3{ 0, 0.8, -2.8 });
     Camera::SetTarget(XMFLOAT3{ 0,0.8,0 });
     sptlight_ =
@@ -194,8 +194,8 @@ void Stage::Draw()
     Model::Draw(hRoom_);
 
     static Transform tbunny;
-    //tbunny.scale_ = { 0.25,0.25,0.25 };
-    //tbunny.position_ = { 0, 0.5, 0 };
+    tbunny.scale_ = { 0.5,0.5,0.5 };
+    tbunny.position_ = { 0, 0.5, 0 };
 
     if(isRotate_)
         tbunny.rotate_.y += 2;//ドーナツの回転
