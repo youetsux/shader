@@ -55,7 +55,7 @@ void Stage::Initialize()
     hModel_ = Model::Load("Assets\\Ball.fbx");
     hRoom_ = Model::Load("Assets\\room.fbx");
     hGround = Model::Load("Assets\\plane3.fbx");
-    //hBunny_ = Model::Load("Assets\\ishigaki.fbx");
+  //  hBunny_ = Model::Load("Assets\\ishigaki.fbx");
     hBunny_ = Model::Load("Assets\\torus.fbx");
     Camera::SetPosition(XMFLOAT3{ 0, 0.8, -2.8 });
     Camera::SetTarget(XMFLOAT3{ 0,0.8,0 });
